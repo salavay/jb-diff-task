@@ -11,47 +11,63 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Diff {
+    /**
+     * Create Diff.html - diff of two given files
+     *
+     * @param args 2 path of old and new files
+     */
     public static void main(final String[] args) {
         if (args.length != 2) {
-            // Print usage?
-            System.err.println("There should be 2 paths in program argument");
+            System.err.println("There should be 2 paths in program arguments");
             return;
         }
         final Path oldTextFilePath;
         final Path newTextFilePath;
         try {
-            oldTextFilePath = Path.of(args[0]).toAbsolutePath();
-            newTextFilePath = Path.of(args[1]).toAbsolutePath();
+            oldTextFilePath = Path.of(args[0]);
+            newTextFilePath = Path.of(args[1]);
         } catch (final InvalidPathException e) {
-            // NOTE: Системные сообщения об ошибке
             System.err.println("The paths are invalid");
             return;
         }
+
+        final List<String> oldLines, newLines;
         try {
-            final List<String> oldLines = Files.readAllLines(oldTextFilePath);
+            oldLines = Files.readAllLines(oldTextFilePath);
             try {
-                final List<String> newLines = Files.readAllLines(newTextFilePath);
-                processLcm(oldLines, newLines);
+                newLines = Files.readAllLines(newTextFilePath);
             } catch (final IOException e) {
-                // NOTE: Системные сообщения об ошибке
                 System.err.println("Can't read new file");
+                return;
             }
         } catch (final IOException e) {
-            // NOTE: Системные сообщения об ошибке
             System.err.println("Can't read old file");
+            return;
         }
+        processDiff(oldLines, newLines);
     }
 
-    private static void processLcm(final List<String> oldLines,
-                                   final List<String> newLines) {
-        // Комментирование кода
+    /**
+     * Get 2 files and render Diff.html of them. Files must be given as {@link List<String>}
+     *
+     * @param oldLines old file
+     * @param newLines new file
+     * @see #writeToHtml(StringType[][], List, List)
+     */
+    private static void processDiff(final List<String> oldLines,
+                                    final List<String> newLines) {
+        // Table of LCM algorithm
         final long[][] lcmTable;
+        // Table of algorithm transitions
         final StringType[][] typesOfString;
         final int oldFileSize = oldLines.size();
         final int newFileSize = newLines.size();
         lcmTable = new long[oldFileSize + 1][newFileSize + 1];
         typesOfString = new StringType[oldFileSize + 1][newFileSize + 1];
 
+        /* LCM algorithm
+         *  Check javaDoc of StringType for transition description
+         */
         for (int i = 0; i <= oldFileSize; i++) {
             for (int j = 0; j <= newFileSize; j++) {
                 if (i == 0 || j == 0) {
@@ -84,9 +100,18 @@ public class Diff {
             }
         }
         writeToHtml(typesOfString, oldLines, newLines);
+
+
     }
 
-    // Неоптимальность? Убедиться
+    /**
+     * Write Diff.html file based on transitions of LCM algorithm. Html rendering using Freemarker template.
+     *
+     * @param typesOfString transitions({@link StringType}) of LCM algorithm
+     * @param oldLines      old file
+     * @param newLines      new file
+     * @see #renderHtml(String, String, String)
+     */
     private static void writeToHtml(final StringType[][] typesOfString,
                                     final List<String> oldLines,
                                     final List<String> newLines) {
@@ -127,32 +152,58 @@ public class Diff {
                 collectionsToString(newLines));
     }
 
+
+    /**
+     * Return div block with given {@code line} and next classes: {@link StringType#toString()} and d-flex
+     *
+     * @param line       text in block
+     * @param stringType parameter {@link StringType#toString()} implementation of which would be inserted in html class
+     * @return {@link String} of html div block
+     */
     private static String getHtmlElement(final String line, final StringType stringType) {
         return String.format("<div class=\"%s d-flex\">%s</div>", stringType, line);
     }
 
+    /**
+     * Create Diff.html file using Freemarker template.
+     *
+     * @param oldText  text of old file
+     * @param diffText text of diff file
+     * @param newText  text of new file
+     */
     private static void renderHtml(final String oldText, final String diffText, final String newText) {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
         try {
             cfg.setDirectoryForTemplateLoading(new File("src/main/resources/templates"));
         } catch (final IOException e) {
-            // Ignored
+            System.err.println("Can't set \"templates\" directory for Freemarker config");
         }
         final Map<String, Object> view = new HashMap<>();
         view.put("old_text", oldText);
         view.put("diff_text", diffText);
         view.put("new_text", newText);
-        Template template = null;
+        Template template;
         try {
             template = cfg.getTemplate("diff.ftlh");
         } catch (final IOException e) {
-            // Ignored
+            System.err.println("Can't load Freemarker template");
+            return;
         }
-        try (final BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of("diff.html"))) {
+        try (final BufferedWriter bufferedWriter = Files.newBufferedWriter(Path.of("Diff.html"))) {
             Objects.requireNonNull(template).process(view, bufferedWriter);
         } catch (final TemplateException | IOException e) {
-            // Ignored
+            System.err.println("Can't render freemarker template");
         }
+    }
+
+    /**
+     * Return {@link String} view of {@link Collection<String>}, joined by {@link System#lineSeparator()}
+     *
+     * @param collection {@link Collection<String>} to be represented
+     * @return {@link String} view of collection
+     */
+    private static String collectionsToString(final Collection<String> collection) {
+        return collection.stream().collect(Collectors.joining(System.lineSeparator()));
     }
 
     public static String showMatrix(final long[][] array) {
@@ -175,9 +226,5 @@ public class Diff {
             sb.append(String.format("%n"));
         }
         return sb.toString();
-    }
-
-    private static String collectionsToString(final Collection<String> collection) {
-        return collection.stream().collect(Collectors.joining(System.lineSeparator()));
     }
 }
