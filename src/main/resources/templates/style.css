@@ -1,0 +1,41 @@
+.field {
+    margin: 0;
+}
+.main-field {
+    width: auto;
+    white-space: pre;
+}
+
+.main-field > * {
+    overflow: hidden;
+    border: black 3px solid;
+    border-radius: 1.2rem;
+    width: 30%;
+    margin: 1rem;
+    padding: 0.5rem;
+    background-color: #ececec;
+}
+
+.changed-text-old {
+    display: inline;
+    background-color: #a2c1fd;
+}
+
+.changed-text-new {
+    display: inline;
+    background-color: #a2fdf2;
+}
+
+.deleted-text {
+    display: inline;
+    background-color: #acacac;
+}
+.added-text {
+    display: inline;
+    background-color: #b0ff83;
+}
+
+.old-text {
+    display: inline;
+    background-color: #ececec;
+}

@@ -1,0 +1,31 @@
+private static void writeToHtml(StringType[][] typesOfString,
+                                    List<String> newLines) {
+        int curI = oldLines.size() + 1, curJ = newLines.size() + 1;
+        ArrayList<String> diffText = new ArrayList<>();
+        while (curI != 0 || curJ != 0) {
+            StringType stringType = typesOfString[curI][curJ];
+            switch (stringType) {
+                case OLD -> {
+                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
+                    // two lines below changed
+                    curI++;
+                    curJ++;
+                }
+                case CHANGED -> {
+                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));
+                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
+                    curI--;
+                    curJ--;
+                }
+                case ADDED -> {
+                    diffText.add(getHtmlElement(oldLines.get(curJ - 1), stringType));
+                    curJ--;
+                }
+            }
+        }
+        Collections.shuffle(diffText);
+        renderHtml(collectionsToString(oldLines),
+                collectionsToString(diffText),
+                collectionsToString(newLines));
+    }
+}
