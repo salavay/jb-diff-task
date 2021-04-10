@@ -12,6 +12,13 @@ import java.util.stream.Collectors;
 
 public class Diff {
     /**
+     * Means style of Diff.html. If {@code true} Diff.html will includes 3 columns(old, diff, new).
+     * If {@code false} Diff.html will includes 2 columns as it said in task (SplitView: old, diff).
+     * Also, in SplitView mode only new version of changed lines are visible
+     */
+    private static final boolean tripleView = false;
+
+    /**
      * Create Diff.html - diff of two given files
      *
      * @param args 2 path of old and new files
@@ -100,8 +107,6 @@ public class Diff {
             }
         }
         writeToHtml(typesOfString, oldLines, newLines);
-
-
     }
 
     /**
@@ -110,58 +115,49 @@ public class Diff {
      * @param typesOfString transitions({@link StringType}) of LCM algorithm
      * @param oldLines      old file
      * @param newLines      new file
-     * @see #renderHtml(String, String, String)
+     * @see #renderHtml(List, List, List)
      */
     private static void writeToHtml(final StringType[][] typesOfString,
                                     final List<String> oldLines,
                                     final List<String> newLines) {
         int curI = oldLines.size(), curJ = newLines.size();
-        final ArrayList<String> diffText = new ArrayList<>();
-        final List<String> changedLinesBuffer = new ArrayList<>();
+        final List<StringWithType> diffText = new ArrayList<>();
+        final List<StringWithType> changedLinesBuffer = new ArrayList<>();
+        // Create answer from the ending in reverse order of lines
         while (curI != 0 || curJ != 0) {
             final StringType stringType = typesOfString[curI][curJ];
             switch (stringType) {
                 case OLD -> {
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
+                    diffText.add(new StringWithType(oldLines.get(curI - 1), stringType));
                     curI--;
                     curJ--;
                 }
                 case CHANGEDOLD -> {
-                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));
-                    changedLinesBuffer.add(getHtmlElement(oldLines.get(curI - 1), StringType.CHANGEDNEW));
+                    diffText.add(new StringWithType(newLines.get(curJ - 1), stringType));
+                    if (tripleView) {
+                        changedLinesBuffer.add(new StringWithType(oldLines.get(curI - 1), StringType.CHANGEDNEW));
+                        if (!typesOfString[curI - 1][curJ - 1].equals(StringType.CHANGEDOLD)) {
+                            diffText.addAll(changedLinesBuffer);
+                            changedLinesBuffer.clear();
+                        }
+                    }
                     curI--;
                     curJ--;
-                    if (!typesOfString[curI][curJ].equals(StringType.CHANGEDOLD)) {
-                        diffText.addAll(changedLinesBuffer);
-                        changedLinesBuffer.clear();
-                    }
                 }
                 case ADDED -> {
-                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));
+                    diffText.add(new StringWithType(newLines.get(curJ - 1), stringType));
                     curJ--;
                 }
                 case DELETED -> {
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
+                    diffText.add(new StringWithType(oldLines.get(curI - 1), stringType));
                     curI--;
                 }
             }
         }
         Collections.reverse(diffText);
-        renderHtml(collectionsToString(oldLines),
-                collectionsToString(diffText),
-                collectionsToString(newLines));
-    }
-
-
-    /**
-     * Return div block with given {@code line} and next classes: {@link StringType#toString()} and d-flex
-     *
-     * @param line       text in block
-     * @param stringType parameter {@link StringType#toString()} implementation of which would be inserted in html class
-     * @return {@link String} of html div block
-     */
-    private static String getHtmlElement(final String line, final StringType stringType) {
-        return String.format("<div class=\"%s d-flex\">%s</div>", stringType, line);
+        renderHtml(mapToStringWithDefaultType(oldLines),
+                diffText,
+                mapToStringWithDefaultType(newLines));
     }
 
     /**
@@ -171,7 +167,7 @@ public class Diff {
      * @param diffText text of diff file
      * @param newText  text of new file
      */
-    private static void renderHtml(final String oldText, final String diffText, final String newText) {
+    private static void renderHtml(final List<StringWithType> oldText, final List<StringWithType> diffText, final List<StringWithType> newText) {
         final Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
         try {
             cfg.setDirectoryForTemplateLoading(new File("src/main/resources/templates"));
@@ -181,7 +177,10 @@ public class Diff {
         final Map<String, Object> view = new HashMap<>();
         view.put("old_text", oldText);
         view.put("diff_text", diffText);
-        view.put("new_text", newText);
+        if (tripleView) {
+            view.put("new_text", newText);
+        }
+        view.put("isTripleView", tripleView);
         Template template;
         try {
             template = cfg.getTemplate("diff.ftlh");
@@ -197,34 +196,34 @@ public class Diff {
     }
 
     /**
-     * Return {@link String} view of {@link Collection<String>}, joined by {@link System#lineSeparator()}
+     * Map {@link Collection<String>} to {@link Collection<StringWithType>} with {@link StringType#OLD} type.
      *
      * @param collection {@link Collection<String>} to be represented
      * @return {@link String} view of collection
      */
-    private static String collectionsToString(final Collection<String> collection) {
-        return collection.stream().collect(Collectors.joining(System.lineSeparator()));
+    private static List<StringWithType> mapToStringWithDefaultType(final Collection<String> collection) {
+        return collection.stream().map(x -> new StringWithType(x, StringType.OLD)).collect(Collectors.toList());
     }
 
-    public static String showMatrix(final long[][] array) {
-        final StringBuilder sb = new StringBuilder();
-        for (final long[] i : array) {
-            for (final long j : i) {
-                sb.append(String.format("%d   ", j));
-            }
-            sb.append(String.format("%n"));
-        }
-        return sb.toString();
-    }
+    /**
+     * This class needed to print string as HTML block with custom class.
+     * {@link StringWithType#stringType#toString()} - name of CSS class
+     */
+    public static class StringWithType {
+        private final String string;
+        private final StringType stringType;
 
-    public static String showTypes(final StringType[][] types) {
-        final StringBuilder sb = new StringBuilder();
-        for (final StringType[] i : types) {
-            for (final StringType j : i) {
-                sb.append(String.format("%s   ", j));
-            }
-            sb.append(String.format("%n"));
+        public StringWithType(String string, StringType stringType) {
+            this.string = string;
+            this.stringType = stringType;
         }
-        return sb.toString();
+
+        public String getString() {
+            return string;
+        }
+
+        public StringType getStringType() {
+            return stringType;
+        }
     }
 }

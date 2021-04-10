@@ -5,19 +5,35 @@
     <head>
         <meta charset="UTF-8">
         <title>Diff</title>
-        <style type="text/css">
+        <style>
 .field {
     margin: 0;
 }
 
-.middle {
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
     background-image: url("img/JB_Background.png");
+    background-size: cover;
+    background-repeat: repeat;
+}
+
+.middle {
+    margin-top: 2rem;
+}
+
+.field-header {
+    text-align: center;
+    font-size: 2rem;
+    color: black;
 }
 
 .main-field {
     width: auto;
     white-space: pre;
-    padding-top: 3rem;
 }
 
 .main-field > * {
@@ -25,10 +41,9 @@
     overflow-y: hidden;
     border: black 3px solid;
     border-radius: 1.2rem;
-    width: 30%;
     margin: 1rem;
-    padding: 0.5rem;
     background-color: white;
+    padding: 0 0.5rem 0 1rem;
 }
 
 .changed-text-old {
@@ -48,135 +63,101 @@
 
 .added-text {
     display: inline;
-    background-color: rgba(24,214,140,0.7);
+    background-color: rgba(24, 214, 140, 0.7);
 }
 
 .old-text {
     display: inline;
 }
-        </style>
+.main-field > * {
+    width: 40%;
+}        </style>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
               integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
               crossorigin="anonymous">
     </head>
     <body>
     <header>
-
     </header>
     <div class="middle">
         <div class="main-field d-flex justify-content-center">
-            <div class="old-field">
-                private static void writeToHtml(StringType[][] typesOfString,
-                                    List<String> oldLines,
-                                    List<String> newLines) {
-        int curI = oldLines.size(), curJ = newLines.size();
-        ArrayList<String> diffText = new ArrayList<>();
-        while (curI != 0 || curJ != 0) {
-            StringType stringType = typesOfString[curI][curJ];
-            switch (stringType) {
-                case OLD -> {
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
-                    curI--;
-                    curJ--;
-                }
-                case CHANGED -> {
-                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
-                    curI--;
-                    curJ--;
-                }
-                case ADDED -> {
-                    diffText.add(getHtmlElement(oldLines.get(curJ - 1), stringType));
-                    curJ--;
-                }
-                case DELETED -> {
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
-                    curI--;
-                }
-            }
-        }
-        Collections.reverse(diffText);
-        renderHtml(collectionsToString(oldLines),
-                collectionsToString(diffText),
-                collectionsToString(newLines));
-    }
-}
-            </div>
-            <div class="diff-field d-flex flex-column">
-                <div class="old-text d-flex">private static void writeToHtml(StringType[][] typesOfString,</div>
-<div class="deleted-text d-flex">                                    List<String> oldLines,</div>
-<div class="old-text d-flex">                                    List<String> newLines) {</div>
-<div class="changed-text-new d-flex">        int curI = oldLines.size(), curJ = newLines.size();</div>
-<div class="changed-text-old d-flex">        int curI = oldLines.size() + 1, curJ = newLines.size() + 1;</div>
-<div class="old-text d-flex">        ArrayList<String> diffText = new ArrayList<>();</div>
-<div class="old-text d-flex">        while (curI != 0 || curJ != 0) {</div>
-<div class="old-text d-flex">            StringType stringType = typesOfString[curI][curJ];</div>
-<div class="old-text d-flex">            switch (stringType) {</div>
-<div class="old-text d-flex">                case OLD -> {</div>
-<div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
-<div class="added-text d-flex">                    // two lines below changed</div>
-<div class="changed-text-new d-flex">                    curI--;</div>
-<div class="changed-text-new d-flex">                    curJ--;</div>
-<div class="changed-text-old d-flex">                    curI++;</div>
-<div class="changed-text-old d-flex">                    curJ++;</div>
-<div class="old-text d-flex">                }</div>
-<div class="old-text d-flex">                case CHANGED -> {</div>
-<div class="old-text d-flex">                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));</div>
-<div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
-<div class="old-text d-flex">                    curI--;</div>
-<div class="old-text d-flex">                    curJ--;</div>
-<div class="old-text d-flex">                }</div>
-<div class="old-text d-flex">                case ADDED -> {</div>
-<div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curJ - 1), stringType));</div>
-<div class="old-text d-flex">                    curJ--;</div>
-<div class="deleted-text d-flex">                }</div>
-<div class="deleted-text d-flex">                case DELETED -> {</div>
-<div class="deleted-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
-<div class="deleted-text d-flex">                    curI--;</div>
-<div class="old-text d-flex">                }</div>
-<div class="old-text d-flex">            }</div>
-<div class="old-text d-flex">        }</div>
-<div class="changed-text-new d-flex">        Collections.reverse(diffText);</div>
-<div class="changed-text-old d-flex">        Collections.shuffle(diffText);</div>
-<div class="old-text d-flex">        renderHtml(collectionsToString(oldLines),</div>
-<div class="old-text d-flex">                collectionsToString(diffText),</div>
-<div class="old-text d-flex">                collectionsToString(newLines));</div>
-<div class="old-text d-flex">    }</div>
-<div class="old-text d-flex">}</div>
-            </div>
-            <div class="new-field">
-                private static void writeToHtml(StringType[][] typesOfString,
-                                    List<String> newLines) {
-        int curI = oldLines.size() + 1, curJ = newLines.size() + 1;
-        ArrayList<String> diffText = new ArrayList<>();
-        while (curI != 0 || curJ != 0) {
-            StringType stringType = typesOfString[curI][curJ];
-            switch (stringType) {
-                case OLD -> {
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
-                    // two lines below changed
-                    curI++;
-                    curJ++;
-                }
-                case CHANGED -> {
-                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));
-                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
-                    curI--;
-                    curJ--;
-                }
-                case ADDED -> {
-                    diffText.add(getHtmlElement(oldLines.get(curJ - 1), stringType));
-                    curJ--;
-                }
-            }
-        }
-        Collections.shuffle(diffText);
-        renderHtml(collectionsToString(oldLines),
-                collectionsToString(diffText),
-                collectionsToString(newLines));
-    }
-}
-            </div>
+    <div class="old-field d-flex flex-column">
+        <div class="field-header">Original</div>
+        <div class="old-text d-flex">private static void writeToHtml(StringType[][] typesOfString,</div>
+        <div class="old-text d-flex">                                    List&lt;String&gt; oldLines,</div>
+        <div class="old-text d-flex">                                    List&lt;String&gt; newLines) {</div>
+        <div class="old-text d-flex">        int curI = oldLines.size(), curJ = newLines.size();</div>
+        <div class="old-text d-flex">        ArrayList&lt;String&gt; diffText = new ArrayList&lt;&gt;();</div>
+        <div class="old-text d-flex">        while (curI != 0 || curJ != 0) {</div>
+        <div class="old-text d-flex">            StringType stringType = typesOfString[curI][curJ];</div>
+        <div class="old-text d-flex">            switch (stringType) {</div>
+        <div class="old-text d-flex">                case OLD -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
+        <div class="old-text d-flex">                    curI-</div>
+        <div class="old-text d-flex">                    curJ--;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">                case CHANGED -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
+        <div class="old-text d-flex">                    curI--;</div>
+        <div class="old-text d-flex">                    curJ--;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">                case ADDED -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curJ - 1), stringType));</div>
+        <div class="old-text d-flex">                    curJ--;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">                case DELETED -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
+        <div class="old-text d-flex">                    curI--;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">            }</div>
+        <div class="old-text d-flex">        }</div>
+        <div class="old-text d-flex">        Collections.reverse(diffText);</div>
+        <div class="old-text d-flex">        renderHtml(collectionsToString(oldLines),</div>
+        <div class="old-text d-flex">                collectionsToString(diffText),</div>
+        <div class="old-text d-flex">                collectionsToString(newLines));</div>
+        <div class="old-text d-flex">    }</div>
+        <div class="old-text d-flex">}</div>
+    </div>
+    <div class="old-field d-flex flex-column">
+        <div class="field-header">Diff</div>
+        <div class="old-text d-flex">private static void writeToHtml(StringType[][] typesOfString,</div>
+        <div class="deleted-text d-flex">                                    List&lt;String&gt; oldLines,</div>
+        <div class="old-text d-flex">                                    List&lt;String&gt; newLines) {</div>
+        <div class="changed-text-old d-flex">        int curI = oldLines.size() + 1, curJ = newLines.size() + 1;</div>
+        <div class="old-text d-flex">        ArrayList&lt;String&gt; diffText = new ArrayList&lt;&gt;();</div>
+        <div class="old-text d-flex">        while (curI != 0 || curJ != 0) {</div>
+        <div class="old-text d-flex">            StringType stringType = typesOfString[curI][curJ];</div>
+        <div class="old-text d-flex">            switch (stringType) {</div>
+        <div class="old-text d-flex">                case OLD -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
+        <div class="added-text d-flex">                    // two lines below changed</div>
+        <div class="changed-text-old d-flex">                    curI++;</div>
+        <div class="changed-text-old d-flex">                    curJ++;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">                case CHANGED -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(newLines.get(curJ - 1), stringType));</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
+        <div class="old-text d-flex">                    curI--;</div>
+        <div class="old-text d-flex">                    curJ--;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">                case ADDED -&gt; {</div>
+        <div class="old-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curJ - 1), stringType));</div>
+        <div class="old-text d-flex">                    curJ--;</div>
+        <div class="deleted-text d-flex">                }</div>
+        <div class="deleted-text d-flex">                case DELETED -&gt; {</div>
+        <div class="deleted-text d-flex">                    diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));</div>
+        <div class="deleted-text d-flex">                    curI--;</div>
+        <div class="old-text d-flex">                }</div>
+        <div class="old-text d-flex">            }</div>
+        <div class="old-text d-flex">        }</div>
+        <div class="changed-text-old d-flex">        Collections.shuffle(diffText);</div>
+        <div class="old-text d-flex">        renderHtml(collectionsToString(oldLines),</div>
+        <div class="old-text d-flex">                collectionsToString(diffText),</div>
+        <div class="old-text d-flex">                collectionsToString(newLines));</div>
+        <div class="old-text d-flex">    }</div>
+        <div class="old-text d-flex">}</div>
+    </div>
         </div>
     </div>
     <footer>

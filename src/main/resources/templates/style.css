@@ -1,15 +1,27 @@
-.field {
+html, body {
+    height: 100%;
     margin: 0;
 }
 
-.middle {
+body {
     background-image: url("img/JB_Background.png");
+    background-size: cover;
+    background-repeat: repeat;
+}
+
+.middle {
+    margin-top: 2rem;
+}
+
+.field-header {
+    text-align: center;
+    font-size: 2rem;
+    color: black;
 }
 
 .main-field {
     width: auto;
     white-space: pre;
-    padding-top: 3rem;
 }
 
 .main-field > * {
@@ -17,10 +29,9 @@
     overflow-y: hidden;
     border: black 3px solid;
     border-radius: 1.2rem;
-    width: 30%;
     margin: 1rem;
-    padding: 0.5rem;
     background-color: white;
+    padding: 0 0.5rem 0 1rem;
 }
 
 .changed-text-old {

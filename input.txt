@@ -8,7 +8,7 @@ private static void writeToHtml(StringType[][] typesOfString,
             switch (stringType) {
                 case OLD -> {
                     diffText.add(getHtmlElement(oldLines.get(curI - 1), stringType));
-                    curI--;
+                    curI-
                     curJ--;
                 }
                 case CHANGED -> {
