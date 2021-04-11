@@ -181,7 +181,7 @@ public class Diff {
             view.put("new_text", newText);
         }
         view.put("isTripleView", tripleView);
-        Template template;
+        final Template template;
         try {
             template = cfg.getTemplate("diff.ftlh");
         } catch (final IOException e) {
@@ -213,7 +213,7 @@ public class Diff {
         private final String string;
         private final StringType stringType;
 
-        public StringWithType(String string, StringType stringType) {
+        public StringWithType(final String string, final StringType stringType) {
             this.string = string;
             this.stringType = stringType;
         }
